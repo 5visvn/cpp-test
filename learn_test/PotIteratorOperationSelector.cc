@@ -4,7 +4,6 @@
 // for ip pot, need to check every data for different operations
 // for smp pot, need to check only once.
 #include <set>
-#include <vector>
 #include <functional>
 
 class Cleaner{
@@ -20,22 +19,21 @@ public:
       bool check5G{true};
       typedef std::function<void()> Method;
 
-      std::vector<Method> cleanMethods;
       // reauth
       auto ping = [&](){
          reauth(protocol, sessionId);
       };
       // remove
-      auto remove = [&](){
+      auto re = [&](){
          remove(protocol, sessions);
       };
       // remove and pingRAR selector
       auto methodSelector = [&](){
-                               if ((protocol == "4G" && check4G) || (protocol == "5G" && check5G)
-            ping();
-                                   if ((protocol == "4G" && !check4G) || (protocol == "5G" && !check5G)
-            remove();
-      };
+         if ((protocol == "4G" && check4G) || (protocol == "5G" && check5G))
+               ping();
+         if ((protocol == "4G" && !check4G) || (protocol == "5G" && !check5G))
+               re();
+         };
 
       Method method;
       std::string potType{};
@@ -47,7 +45,7 @@ public:
          if (check4G)
             method = std::move(ping);
          else
-            method = std::move(remove);
+            method = std::move(re);
       }
 
       // iterate pot
