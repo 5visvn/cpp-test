@@ -1,0 +1,101 @@
+@startuml
+
+title obsolete session cleanup
+
+participant CC as "CleanerContorller"
+participant HSCC as "HangingSessions\nCleanController"
+participant HSC as "HangingSessions\nCleaner"
+'participant GX as "pcrfIncoming\nHandler"
+'participant SMF as "SessionCleanup\nNotificationHandler"
+'participant AMF as "AMPcleanup\nNotificationHandler"
+'participant SMP as "MobilityPolicy\nIncomingHandler"
+participant handlers as "handlers"
+
+CC -> HSCC : cleanHangingSessions
+
+note over HSC: cleanSessions
+HSCC -> HSC : add EPC_IpSessionPot cleaner
+
+' distinct Gx and 5G
+'HSC --> GX :  notifySessionClean\n(GX, sessionIds)
+'note left: GX
+'
+'group 5G
+'    note over HSCC : check Core5G licenses
+'    HSC --> SMF : notifySessionClean\n(SMF, sessionIds)
+'    note left: SMF
+'
+'    HSCC -> HSC : add AMFSessionPot cleaner
+'    HSC --> AMF : notifySessionClean\n(AMF, sessionIds)
+'    note left: AMF
+'end
+'
+'HSCC -> HSC : add SmpSessionPot cleaner
+'HSC --> SMP : notifySessionClean\n(SMP, sessionIds)
+'note left: SMP
+
+note over HSC, handlers: notifySessionClean(SMP, sessionIds)
+HSC --> handlers
+note left: GX
+note right: pcrfIncomingHandler
+group 5G:
+  HSC --> handlers
+  note left: SMF
+  note right: SessionCleanupNotificationHandler
+HSCC -> HSC : add AMFSessionPot cleaner
+  HSC --> handlers
+  note left: AMF
+  note right: AMPcleanupNotificationHandler
+end
+HSCC -> HSC : add SmpSessionPot cleaner
+HSC --> handlers
+note left: SMP
+note right: MobilityPolicyIncomingHandler
+
+@enduml
+
+
+
+                                                                 obsolete session cleanup
+
+                                  ┌───────────────┐             ┌───────────────┐
+     ┌─────────────────┐          │HangingSessions│             │HangingSessions│          ┌────────┐
+     │CleanerContorller│          │CleanController│             │Cleaner        │          │handlers│
+     └────────┬────────┘          └───────┬───────┘             └───────┬───────┘          └───┬────┘
+              │   cleanHangingSessions    │                             │                      │
+              │──────────────────────────>│                             │                      │
+              │                           │                             │                      │
+              │                           │                     ╔═══════╧═══════╗              │
+              │                           │                     ║cleanSessions ░║              │
+              │                           │                     ╚═══════╤═══════╝              │
+              │                           │add EPC_IpSessionPot cleaner │                      │
+              │                           │────────────────────────────>│                      │
+              │                           │                             │                      │
+              │                           │                      ╔══════╧══════════════════════╧═══════╗
+              │                           │                      ║notifySessionClean(SMP, sessionIds) ░║
+              │                           │                      ╚══════╤══════════════════════╤═══════╝
+              │                           │                      ╔════╗ │                      │  ╔═════════════════════╗
+              │                           │                      ║GX ░║ │ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ >│  ║pcrfIncomingHandler ░║
+              │                           │                      ╚════╝ │                      │  ╚═════════════════════╝
+              │                           │                             │                      │
+              │         ╔══════╤══════════╪═════════════════════════════╪══════════════════════╪════════════════════════════════════════════════╗
+              │         ║ 5G:  │          │                             │                      │                                                ║
+              │         ╟──────┘          │                     ╔═════╗ │                      │  ╔═══════════════════════════════════╗         ║
+              │         ║                 │                     ║SMF ░║ │ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ >│  ║SessionCleanupNotificationHandler ░║         ║
+              │         ║                 │                     ╚═════╝ │                      │  ╚═══════════════════════════════════╝         ║
+              │         ║                 │ add AMFSessionPot cleaner   │                      │                                                ║
+              │         ║                 │────────────────────────────>│                      │                                                ║
+              │         ║                 │                             │                      │                                                ║
+              │         ║                 │                     ╔═════╗ │                      │  ╔═══════════════════════════════╗             ║
+              │         ║                 │                     ║AMF ░║ │ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ >│  ║AMPcleanupNotificationHandler ░║             ║
+              │         ╚═════════════════╪═════════════════════╚═════╝═╪══════════════════════╪══╚═══════════════════════════════╝═════════════╝
+              │                           │                             │                      │
+              │                           │ add SmpSessionPot cleaner   │                      │
+              │                           │────────────────────────────>│                      │
+              │                           │                             │                      │
+              │                           │                     ╔═════╗ │                      │  ╔═══════════════════════════════╗
+              │                           │                     ║SMP ░║ │ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ >│  ║MobilityPolicyIncomingHandler ░║
+     ┌────────┴────────┐          ┌───────┴───────┐             ╚═════╝─┴───────┐          ┌───┴──╚═══════════════════════════════╝
+     │CleanerContorller│          │HangingSessions│             │HangingSessions│          │handlers│
+     └─────────────────┘          │CleanController│             │Cleaner        │          └────────┘
+                                  └───────────────┘             └───────────────┘
