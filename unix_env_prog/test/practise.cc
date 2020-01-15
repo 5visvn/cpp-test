@@ -1,4 +1,4 @@
-#include "apue.h"
+#include "../apue.3e/include/apue.h"
 #include "fcntl.h"
 
 #define RWRWRW (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
