@@ -4,6 +4,7 @@
 #include <vector>
 #include <queue>
 #include <algorithm>
+#include <iomanip>
 
 using namespace std;
 // Definition for a binary tree node.
@@ -27,12 +28,9 @@ public:
       else if (start == end)
          return new TreeNode(vec[start]);
       int mid = (start + end)/2;
-      // return (start > end )
-      //    ? nullptr :
-      return
-         new TreeNode(vec[mid],
-                      getBst(vec, start, mid - 1),
-                      getBst(vec, mid + 1, end));
+      return new TreeNode(vec[mid],
+                          getBst(vec, start, mid - 1),
+                          getBst(vec, mid + 1, end));
    }
 
    TreeNode* sortedArrayToBST(vector<int>& nums) {
@@ -49,11 +47,6 @@ public:
       return h;
    }
 
-   string getSpaces(int i)
-   {
-      return string(i, ' ');
-   }
-
    void printBst(TreeNode* node)
    {
       std::queue<TreeNode*> q1;
@@ -64,16 +57,18 @@ public:
       int prefixs[height];
       int seperators[height];
       prefixs[0] = 0;
-      seperators[0] = 3;
+      seperators[0] = 1;
       for (int i = 1; i < height; ++i)
       {
-         prefixs[i] = prefixs[i-1] + 1 + seperators[i-1] / 2;
-         seperators[i] = seperators[i-1] + 2 + (seperators[i-1]/2) *2;
+         prefixs[i] = 2*prefixs[i-1] + 1;
+         seperators[i] = 2* seperators[i-1] + 1 ;
       }
 
-      std::cout <<height << endl
-                << seperators[height-1]<<endl
-                << prefixs[height-1] << endl;
+      int bst_max_size = 2 << (height - 1);
+      cout << "max:" << bst_max_size << endl;
+      int NUM_LEN = std::to_string(bst_max_size).size();
+
+      auto getSpaces = [&NUM_LEN](int i){return string(i * NUM_LEN, ' ');};
 
       auto decodeQueue = [&]
          (std::queue<TreeNode*>& inq, std::queue<TreeNode*>& outq)
@@ -85,13 +80,13 @@ public:
             auto spaces = getSpaces(seperators[height]);
             if (front)
             {
-               cout << front->val << spaces;
+               cout << setw(NUM_LEN) << front->val << spaces;
                outq.push(front->left);
                outq.push(front->right);
             }
             else
             {
-               cout << " " << spaces;
+               cout << getSpaces(1) << spaces;
             }
          }
       };
@@ -101,14 +96,14 @@ public:
       q1.push(node); // root node
       while (not q1.empty() && height > 0)
       {
-         cout << getSpaces(prefixs[--height]);
+         cout << height << getSpaces(prefixs[--height]);
          decodeQueue(q1, q2);
          cout << endl;
 
          if (height == 0)
             break;
 
-         cout << getSpaces(prefixs[--height]);
+         cout << height << getSpaces(prefixs[--height]);
          decodeQueue(q2, q1);
          cout << endl;
       }
@@ -118,10 +113,10 @@ public:
 
 int main()
 {
-   size_t count = 50;
+   size_t count = 51;
    vector<int> nums;
    nums.reserve(count);
-   for (int i =0; i < count; ++i)
+   for (int i = 1; i <= count; ++i)
       nums.emplace_back(i);
 
    Solution s;
