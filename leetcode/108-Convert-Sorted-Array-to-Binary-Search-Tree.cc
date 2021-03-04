@@ -92,18 +92,17 @@ public:
       };
 
 
-
       q1.push(node); // root node
       while (not q1.empty() && height > 0)
       {
-         cout << height << getSpaces(prefixs[--height]);
+         cout << getSpaces(prefixs[--height]);
          decodeQueue(q1, q2);
          cout << endl;
 
          if (height == 0)
             break;
 
-         cout << height << getSpaces(prefixs[--height]);
+         cout << getSpaces(prefixs[--height]);
          decodeQueue(q2, q1);
          cout << endl;
       }
@@ -123,5 +122,10 @@ int main()
    TreeNode* bst = s.sortedArrayToBST(nums);
 
    s.printBst(bst);
+
+   vector<int> leet{-10,-3,0,5,9};
+   TreeNode* leetBst = s.sortedArrayToBST(leet);
+   s.printBst(leetBst);
+
    return 0;
 }
